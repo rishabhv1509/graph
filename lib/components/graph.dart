@@ -9,12 +9,14 @@ class Graph extends StatefulWidget {
   final GraphDuration duartion;
   final double? height;
   final double? width;
+  final bool showLabels;
   const Graph(
       {Key? key,
       required this.dataPoints,
       required this.duartion,
       this.height,
-      this.width})
+      this.width,
+      this.showLabels = false})
       : super(key: key);
 
   @override
@@ -24,25 +26,112 @@ class Graph extends StatefulWidget {
 class _GraphState extends State<Graph> {
   List<DateTime> xAxisPoints = [];
   List<FlSpot> spots = [];
+  List labels = [];
+  var map;
   @override
   void initState() {
     for (var element in widget.dataPoints) {
       DateTime dateTime =
           DateTime.fromMillisecondsSinceEpoch(element.x.toInt());
       xAxisPoints.add(dateTime);
-      spots = List.generate(
-          widget.dataPoints.length,
-          (index) => FlSpot(widget.dataPoints[index].x.toDouble(),
-              widget.dataPoints[index].y.toDouble()));
     }
-    print(spots);
+    // print(spots);
     mapTimeStampToY();
+    generateSpots();
     super.initState();
   }
 
+  getLabels() {
+    DateTime first, last, mid;
+    first =
+        DateTime.fromMillisecondsSinceEpoch(widget.dataPoints.first.x.toInt());
+    last =
+        DateTime.fromMillisecondsSinceEpoch(widget.dataPoints.last.x.toInt());
+    mid = DateTime.fromMillisecondsSinceEpoch(
+        widget.dataPoints[(widget.dataPoints.length / 2).floor()].x.toInt());
+    labels.add(first);
+    labels.add(mid);
+    labels.add(last);
+  }
+
+  generateSpots() {
+    spots = List.generate(
+        widget.dataPoints.length,
+        (index) => FlSpot(
+              map[index].toDouble(),
+              widget.dataPoints[index].y.toDouble(),
+            ));
+    print(spots);
+  }
+
   mapTimeStampToY() {
-    var mp = widget.dataPoints.map((e) => e.x - widget.dataPoints.first.x);
-    print('mp====>$mp');
+    if (widget.duartion == GraphDuration.daily) {
+      widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
+      map = widget.dataPoints
+          .map((e) => ((e.x - widget.dataPoints.first.x) / 3600000).floor())
+          .toList();
+      // print('mp====>$mp');
+      getLabels();
+      print(labels);
+      for (DateTime e in labels) {
+        print(e.hour);
+      }
+    } else if (widget.duartion == GraphDuration.monthly) {
+      widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
+      map = widget.dataPoints
+          .map((e) => ((e.x - widget.dataPoints.first.x) / 2592000000).floor())
+          .toList();
+      // print('mp====>$mp');
+      getLabels();
+      // print(labels);
+      for (DateTime e in labels) {
+        print(e.month);
+      }
+    } else if (widget.duartion == GraphDuration.weekly) {
+      widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
+      map = widget.dataPoints
+          .map((e) => ((e.x - widget.dataPoints.first.x) / 604800000).floor())
+          .toList();
+      // print('mp====>$mp');
+      getLabels();
+      print(labels);
+      for (DateTime e in labels) {
+        print(e.day);
+      }
+    } else if (widget.duartion == GraphDuration.triMonthly) {
+      widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
+      map = widget.dataPoints
+          .map((e) => ((e.x - widget.dataPoints.first.x) / 7948800000).floor())
+          .toList();
+      // print('mp====>$mp');
+      getLabels();
+      print(labels);
+      for (DateTime e in labels) {
+        print(e.month);
+      }
+    } else if (widget.duartion == GraphDuration.halyYearly) {
+      widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
+      map = widget.dataPoints
+          .map((e) => ((e.x - widget.dataPoints.first.x) / 13046400000).floor())
+          .toList();
+      // print('mp====>$mp');
+      getLabels();
+      print(labels);
+      for (DateTime e in labels) {
+        print(e.month);
+      }
+    } else if (widget.duartion == GraphDuration.yearly) {
+      widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
+      map = widget.dataPoints
+          .map((e) => ((e.x - widget.dataPoints.first.x) / 13046400000).floor())
+          .toList();
+      // print('mp====>$mp');
+      getLabels();
+      print(labels);
+      for (DateTime e in labels) {
+        print(e.year);
+      }
+    }
   }
 
   @override
