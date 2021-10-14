@@ -16,7 +16,7 @@ class Graph extends StatefulWidget {
       required this.duartion,
       this.height,
       this.width,
-      this.showLabels = false})
+      this.showLabels = true})
       : super(key: key);
 
   @override
@@ -24,24 +24,18 @@ class Graph extends StatefulWidget {
 }
 
 class _GraphState extends State<Graph> {
-  List<DateTime> xAxisPoints = [];
   List<FlSpot> spots = [];
-  List labels = [];
-  var map;
+  Map<int, DateTime> xLabels = {};
+  Map<int, int> yLabels = {};
+  List yCoordinateList = [];
   @override
   void initState() {
-    for (var element in widget.dataPoints) {
-      DateTime dateTime =
-          DateTime.fromMillisecondsSinceEpoch(element.x.toInt());
-      xAxisPoints.add(dateTime);
-    }
-    // print(spots);
     mapTimeStampToY();
     generateSpots();
     super.initState();
   }
 
-  getLabels() {
+  getXAxisLabels() {
     DateTime first, last, mid;
     first =
         DateTime.fromMillisecondsSinceEpoch(widget.dataPoints.first.x.toInt());
@@ -49,16 +43,16 @@ class _GraphState extends State<Graph> {
         DateTime.fromMillisecondsSinceEpoch(widget.dataPoints.last.x.toInt());
     mid = DateTime.fromMillisecondsSinceEpoch(
         widget.dataPoints[(widget.dataPoints.length / 2).floor()].x.toInt());
-    labels.add(first);
-    labels.add(mid);
-    labels.add(last);
+    xLabels[0] = first;
+    xLabels[(widget.dataPoints.length / 2).floor()] = mid;
+    xLabels[widget.dataPoints.length - 1] = last;
   }
 
   generateSpots() {
     spots = List.generate(
         widget.dataPoints.length,
         (index) => FlSpot(
-              map[index].toDouble(),
+              yCoordinateList[index].toDouble(),
               widget.dataPoints[index].y.toDouble(),
             ));
     print(spots);
@@ -67,72 +61,91 @@ class _GraphState extends State<Graph> {
   mapTimeStampToY() {
     if (widget.duartion == GraphDuration.daily) {
       widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
-      map = widget.dataPoints
+      yCoordinateList = widget.dataPoints
           .map((e) => ((e.x - widget.dataPoints.first.x) / 3600000).floor())
           .toList();
-      // print('mp====>$mp');
-      getLabels();
-      print(labels);
-      for (DateTime e in labels) {
-        print(e.hour);
-      }
+
+      getXAxisLabels();
     } else if (widget.duartion == GraphDuration.monthly) {
       widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
-      map = widget.dataPoints
+      yCoordinateList = widget.dataPoints
           .map((e) => ((e.x - widget.dataPoints.first.x) / 2592000000).floor())
           .toList();
-      // print('mp====>$mp');
-      getLabels();
-      // print(labels);
-      for (DateTime e in labels) {
-        print(e.month);
-      }
+
+      getXAxisLabels();
     } else if (widget.duartion == GraphDuration.weekly) {
       widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
-      map = widget.dataPoints
+      yCoordinateList = widget.dataPoints
           .map((e) => ((e.x - widget.dataPoints.first.x) / 604800000).floor())
           .toList();
-      // print('mp====>$mp');
-      getLabels();
-      print(labels);
-      for (DateTime e in labels) {
-        print(e.day);
-      }
+
+      getXAxisLabels();
     } else if (widget.duartion == GraphDuration.triMonthly) {
       widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
-      map = widget.dataPoints
+      yCoordinateList = widget.dataPoints
           .map((e) => ((e.x - widget.dataPoints.first.x) / 7948800000).floor())
           .toList();
-      // print('mp====>$mp');
-      getLabels();
-      print(labels);
-      for (DateTime e in labels) {
-        print(e.month);
-      }
+
+      getXAxisLabels();
     } else if (widget.duartion == GraphDuration.halyYearly) {
       widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
-      map = widget.dataPoints
+      yCoordinateList = widget.dataPoints
           .map((e) => ((e.x - widget.dataPoints.first.x) / 13046400000).floor())
           .toList();
-      // print('mp====>$mp');
-      getLabels();
-      print(labels);
-      for (DateTime e in labels) {
-        print(e.month);
-      }
+
+      getXAxisLabels();
     } else if (widget.duartion == GraphDuration.yearly) {
       widget.dataPoints.sort((a, b) => a.x.compareTo(b.x));
-      map = widget.dataPoints
+      yCoordinateList = widget.dataPoints
           .map((e) => ((e.x - widget.dataPoints.first.x) / 13046400000).floor())
           .toList();
-      // print('mp====>$mp');
-      getLabels();
-      print(labels);
-      for (DateTime e in labels) {
-        print(e.year);
+
+      getXAxisLabels();
+    }
+  }
+
+  mapXAxisLabels(val) {
+    xLabels = {};
+    if (widget.duartion == GraphDuration.daily) {
+      if (xLabels.containsKey(val)) {
+        return xLabels[val]!.hour.toString();
+      } else {
+        return '';
+      }
+    } else if (widget.duartion == GraphDuration.weekly) {
+      if (xLabels.containsKey(val)) {
+        return xLabels[val]!.day.toString();
+      } else {
+        return '';
+      }
+    } else if (widget.duartion == GraphDuration.monthly) {
+      if (xLabels.containsKey(val)) {
+        return xLabels[val]!.month.toString();
+      } else {
+        return '';
+      }
+    } else if (widget.duartion == GraphDuration.triMonthly) {
+      if (xLabels.containsKey(val)) {
+        return xLabels[val]!.month.toString();
+      } else {
+        return '';
+      }
+    } else if (widget.duartion == GraphDuration.halyYearly) {
+      if (xLabels.containsKey(val)) {
+        return xLabels[val]!.month.toString();
+      } else {
+        return '';
+      }
+    } else if (widget.duartion == GraphDuration.yearly) {
+      if (xLabels.containsKey(val)) {
+        return xLabels[val]!.year.toString();
+      } else {
+        return '';
       }
     }
   }
+
+  mapYAxisLabels(value) {}
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +173,7 @@ class _GraphState extends State<Graph> {
           //   },
           // ),
           titlesData: FlTitlesData(
-            show: true,
+            show: widget.showLabels,
             rightTitles: SideTitles(showTitles: false),
             topTitles: SideTitles(showTitles: false),
             bottomTitles: SideTitles(
@@ -172,23 +185,7 @@ class _GraphState extends State<Graph> {
                   fontWeight: FontWeight.bold,
                   fontSize: 16),
               getTitles: (value) {
-                // print('value====$value');
-                // if (value == widget.dataPoints.first.x) {
-                //   return xAxisPoints.first.hour.toString();
-                // }
-                // if (value == widget.dataPoints.last.x) {
-                //   return xAxisPoints.last.hour.toString();
-                // }
-                // return '';
-                switch (value.toInt()) {
-                  case 2:
-                    return 'MAR';
-                  case 5:
-                    return 'JUN';
-                  case 8:
-                    return 'SEP';
-                }
-                return '';
+                return mapXAxisLabels(value);
               },
               // margin: 8,
             ),
